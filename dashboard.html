@@ -114,7 +114,6 @@
 
 <script>
 let behaviorChart;
-// Глобальный массив для хранения Warning продуктов (исправляет ReferenceError)
 let warningProducts = [];
 
 const defaultData = [
@@ -124,6 +123,65 @@ const defaultData = [
     { product: "Ergonomic Office Chair", retention: "190", bounce: "18" }
 ];
 
+// 1. Определение вспомогательных функций управления ИИ-блоком до их первого вызова
+function resetAnalysisState() {
+    const statusText = document.getElementById('engineStatus');
+    const reportBox = document.getElementById('aiReportBox');
+    if (statusText) statusText.innerText = "Dataset altered. Run leak analysis again.";
+    if (reportBox) reportBox.style.display = "none";
+}
+
+function saveTableToStorage() {
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    let tableArr = [];
+    rows.forEach(row => {
+        tableArr.push({
+            product: row.cells[0].innerText.trim(),
+            retention: row.cells[1].innerText.trim(),
+            bounce: row.cells[2].innerText.trim()
+        });
+    });
+    localStorage.setItem('storeBehaviorData', JSON.stringify(tableArr));
+}
+
+function calculateStatuses() {
+    let optimalCount = 0, warningCount = 0, criticalCount = 0;
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    
+    warningProducts = [];
+    
+    rows.forEach(row => {
+        const rTime = parseFloat(row.querySelector('.retention-cell').innerText) || 0;
+        const bRate = parseFloat(row.querySelector('.bounce-cell').innerText) || 0;
+        const statusCell = row.querySelector('.status-cell');
+        const name = row.cells[0].innerText.trim();
+        
+        if (rTime >= 90 && bRate <= 30) {
+            statusCell.innerHTML = '<span class="badge-optimal">Optimal</span>';
+            optimalCount++;
+        } else if (rTime < 50 || bRate >= 60) {
+            statusCell.innerHTML = '<span class="badge-critical">Critical</span>';
+            criticalCount++;
+        } else {
+            statusCell.innerHTML = '<span class="badge-warning">Warning</span>';
+            warningCount++;
+            warningProducts.push({ name: name, retention: rTime, bounce: bRate });
+        }
+    });
+
+    if (behaviorChart) {
+        behaviorChart.data.datasets[0].data = [optimalCount, warningCount, criticalCount];
+        behaviorChart.update();
+    }
+}
+
+function handleTableChange() {
+    saveTableToStorage();
+    calculateStatuses();
+    resetAnalysisState();
+}
+
+// 2. Инициализация интерфейса при полной загрузке окна браузера
 window.onload = function() {
     Chart.defaults.color = '#94a3b8';
     const ctx = document.getElementById('behaviorChart').getContext('2d');
@@ -154,19 +212,6 @@ window.onload = function() {
     loadTableData();
 };
 
-function saveTableToStorage() {
-    const rows = document.querySelectorAll('#dataTable tbody tr');
-    let tableArr = [];
-    rows.forEach(row => {
-        tableArr.push({
-            product: row.cells[0].innerText.trim(),
-            retention: row.cells[1].innerText.trim(),
-            bounce: row.cells[2].innerText.trim()
-        });
-    });
-    localStorage.setItem('storeBehaviorData', JSON.stringify(tableArr));
-}
-
 function loadTableData() {
     let storedData = localStorage.getItem('storeBehaviorData');
     let dataToRender = (storedData && JSON.parse(storedData).length > 0) ? JSON.parse(storedData) : defaultData;
@@ -187,14 +232,201 @@ function loadTableData() {
     calculateStatuses();
 }
 
-function handleTableChange() {
-    saveTableToStorage();
-    calculateStatuses();
-    resetAnalysisState();
+function addNewRow() {
+    const pName = document.getElementById('newProduct').value.trim();
+    const rTime = document.getElementById('newRetention').value.trim();
+    const bRate = document.getElementById('newBounce').value.trim();
+
+    if (!pName || !rTime || !bRate) {
+        alert("Please fill all analytical input values.");
+        return;
+    }
+
+    const tbody = document.getElementById('tableBody');
+    const newTr = document.createElement('tr');
+    newTr.innerHTML = `
+        <td contenteditable="true" oninput="handleTableChange()">${pName}</td>
+        <td contenteditable="true" class="retention-cell" oninput="handleTableChange()">${rTime}</td>
+        <td contenteditable="true" class="bounce-cell" oninput="handleTableChange()">${bRate}</td>
+        <td class="status-cell"></td>
+        <td><button class="btn-action btn-delete" onclick="deleteRow(this)"><i class="fas fa-trash-alt"></i></button></td>
+    `;
+    tbody.appendChild(newTr);
+    
+    document.getElementById('newProduct').value = '';
+    document.getElementById('newRetention').value = '';
+    document.getElementById('newBounce').value = '';
+
+    handleTableChange();
 }
 
-function calculateStatuses() {
-    let optimalCount = 0, warningCount = 0, criticalCount = 0;
+function deleteRow(btn) {
+    btn.closest('tr').remove();
+    handleTableChange();
+}
+
+function resetToDefaultData() {
+    if(confirm("Revert matrix to factory dataset?")) {
+        localStorage.removeItem('storeBehaviorData');
+        loadTableData();
+        resetAnalysisState();
+    }
+}
+
+function filterTable(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     const rows = document.querySelectorAll('#dataTable tbody tr');
     
-    // Очищаем
+    rows.forEach(row => {
+        const rTime = parseFloat(row.querySelector('.retention-cell').innerText) || 0;
+        const bRate = parseFloat(row.querySelector('.bounce-cell').innerText) || 0;
+        
+        if (type === 'bad') {
+            if (rTime < 90 || bRate > 30) row.style.display = '';
+            else row.style.display = 'none';
+        } else {
+            row.style.display = '';
+        }
+    });
+}
+
+function startAdvancedAnalysis() {
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    if (rows.length === 0) {
+        alert("Analytical table matrix is empty.");
+        return;
+    }
+
+    const btn = document.getElementById('aiBtn');
+    const progCont = document.getElementById('progCont');
+    const progBar = document.getElementById('progBar');
+    const aiOutput = document.getElementById('aiOutput');
+    const reportBox = document.getElementById('aiReportBox');
+    const statusText = document.getElementById('engineStatus');
+
+    btn.disabled = true;
+    reportBox.style.display = "none";
+    aiOutput.style.display = "block";
+    progCont.style.display = "block";
+    progBar.style.width = "0%";
+    statusText.innerText = "Scanning conversion logs...";
+
+    let logs = [
+        "> Initializing core database lookup context...",
+        "> Correlating Product Retention times with UI checkout calls...",
+        "> Computing high bounce anomalies and exit-rate metrics...",
+        "> Analysis completed. Generating architectural recommendations..."
+    ];
+
+    let logIdx = 0;
+    aiOutput.innerHTML = logs[0];
+    
+    let interval = setInterval(() => {
+        logIdx++;
+        if(logIdx < logs.length) {
+            aiOutput.innerHTML += "<br>" + logs[logIdx];
+            progBar.style.width = (logIdx * 25) + "%";
+        } else {
+            clearInterval(interval);
+            progCont.style.display = "none";
+            aiOutput.style.display = "none";
+            
+            let worstProduct = "None";
+            let highestBounceProduct = "None";
+            let lowestRetention = 99999;
+            let maxBounce = 0;
+            let totalBounce = 0;
+            let count = 0;
+
+            rows.forEach(row => {
+                let name = row.cells[0].innerText.trim();
+                let ret = parseFloat(row.querySelector('.retention-cell').innerText) || 0;
+                let bnc = parseFloat(row.querySelector('.bounce-cell').innerText) || 0;
+                
+                totalBounce += bnc;
+                count++;
+                
+                if (ret < lowestRetention) {
+                    lowestRetention = ret;
+                    worstProduct = name;
+                }
+                if (bnc > maxBounce) {
+                    maxBounce = bnc;
+                    highestBounceProduct = name;
+                }
+            });
+
+            let avgBounce = Math.round(totalBounce / count);
+            let technicalAdvice = "";
+            let priorityLevel = "";
+            let metricColor = "";
+
+            if (maxBounce >= 60 || lowestRetention < 50) {
+                priorityLevel = "CRITICAL LEAK DETECTED";
+                metricColor = "#ef4444";
+                if (maxBounce >= 60) {
+                    technicalAdvice = `High Bounce Rate anomaly discovered on <strong>"${highestBounceProduct}" (${maxBounce}%)</strong>. Users are bouncing instantly. <em>AI Recommendation:</em> Audit page configuration, compress large graphical blocks, fix possible JS errors causing layout shift, and align call-to-action buttons.`;
+                } else {
+                    technicalAdvice = `Critical drop-off identified on <strong>"${worstProduct}"</strong> due to low retention time (${lowestRetention}s). Optimize description layout and product images to increase engagement.`;
+                }
+            } else if (warningProducts.length > 0) {
+                priorityLevel = "WARNING: REVENUE POTENTIAL UNLOCKED";
+                metricColor = "#f59e0b";
+                technicalAdvice = `Found <strong>${warningProducts.length} product(s)</strong> in unstable state. For example, <strong>"${warningProducts[0].name}"</strong> (Retention: ${warningProducts[0].retention}s, Bounce: ${warningProducts[0].bounce}%). <br><em>AI Path to Optimal:</em> To secure 'Optimal' badge status, decrease Bounce Rate below 30% by restructuring top-fold elements, and increase Retention time past 90s using engaging customer micro-reviews.`;
+            } else {
+                priorityLevel = "STABLE ENGAGEMENT";
+                metricColor = "#10b981";
+                technicalAdvice = "User behavior indicators stay within safe thresholds. High bounce rate logs are clean. Continue continuous asset delivery optimizations.";
+            }
+
+            let warningListItems = "";
+            if (warningProducts && warningProducts.length > 0) {
+                for (let i = 0; i < warningProducts.length; i++) {
+                    let p = warningProducts[i];
+                    let bounceText = p.bounce > 30 ? `Reduce bounce rate by <strong>${Math.round(p.bounce - 30)}%</strong> via layout stabilization.` : '';
+                    let retentionText = p.retention < 90 ? `Elevate retention by <strong>${Math.round(90 - p.retention)}s</strong> via adding product comparison toggles.` : '';
+                    warningListItems += `<li><strong>${p.name}</strong>: Current metrics need a minor boost. ${bounceText} ${retentionText}</li>`;
+                }
+            }
+
+            let warningSectionHtml = "";
+            if (warningListItems !== "") {
+                warningSectionHtml = `
+                    <p style="margin:12px 0 5px 0;"><strong>3. AI Path to Optimal (Optimization Roadmap):</strong></p>
+                    <ul style="margin-left:20px; color:#94a3b8; font-size:0.9rem; line-height: 1.4;">
+                        ${warningListItems}
+                    </ul>
+                `;
+            }
+
+            statusText.innerText = "System Scan Finished.";
+            reportBox.innerHTML = `
+                <h4 style="margin-bottom:12px; font-size:1.1rem; color:#fff;"><i class="fas fa-file-medical-alt"></i> Store Bottleneck Diagnostic Report</h4>
+                <p style="margin:5px 0;"><strong>1. Calculated Store-wide Averages:</strong></p>
+                <ul style="margin-left:20px; color:#94a3b8; font-size:0.9rem;">
+                    <li>Average System Bounce Rate: <strong style="color:#fff;">${avgBounce}%</strong></li>
+                    <li>Peak Single Bounce Rate: <strong style="color:#ef4444;">${maxBounce}% (${highestBounceProduct})</strong></li>
+                    <li>Lowest Product Interaction Threshold: <strong style="color:#fff;">${lowestRetention}s</strong></li>
+                </ul>
+                <p style="margin:12px 0 5px 0;"><strong>2. Discovered Operational Bottlenecks:</strong></p>
+                <p style="margin:5px 0; font-weight:600; color:${metricColor};">${priorityLevel}</p>
+                <p style="background:rgba(15,23,42,0.4); padding:12px; border-radius:6px; font-size:0.9rem; margin-top:8px; border-left:3px solid ${metricColor};">${technicalAdvice}</p>
+                ${warningSectionHtml}
+            `;
+            reportBox.style.display = "block";
+            btn.disabled = false;
+        }
+    }, 800);
+}
+</script>
+
+<footer>
+    <div class="footer-content">
+        <p><strong>Ubaidulla S., Baisenbekov I. | ICT Project</strong></p>
+        <p>Narxoz University | School of Economics and Management | Management</p>
+    </div>
+</footer>
+
+</body>
+</html>
