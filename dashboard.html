@@ -127,7 +127,7 @@ window.onload = function() {
     behaviorChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Optimal (>=90s)', 'Warning (50-89s)', 'Critical (<50s)'],
+            labels: ['Optimal Status', 'Warning Status', 'Critical Status'],
             datasets: [{
                 data: [0, 0, 0],
                 backgroundColor: ['#334155', '#475569', '#1e293b'],
@@ -184,17 +184,19 @@ function calculateStatuses() {
     
     rows.forEach(row => {
         const rTime = parseFloat(row.querySelector('.retention-cell').innerText) || 0;
+        const bRate = parseFloat(row.querySelector('.bounce-cell').innerText) || 0;
         const statusCell = row.querySelector('.status-cell');
         
-        if (rTime >= 90) {
+        // Пересекающаяся валидация: статус зависит и от удержания, и от показателя отказов
+        if (rTime >= 90 && bRate <= 30) {
             statusCell.innerHTML = '<span class="badge-optimal">Optimal</span>';
             optimalCount++;
-        } else if (rTime >= 50) {
-            statusCell.innerHTML = '<span class="badge-warning">Warning</span>';
-            warningCount++;
-        } else {
+        } else if (rTime < 50 || bRate >= 60) {
             statusCell.innerHTML = '<span class="badge-critical">Critical</span>';
             criticalCount++;
+        } else {
+            statusCell.innerHTML = '<span class="badge-warning">Warning</span>';
+            warningCount++;
         }
     });
 
@@ -252,8 +254,11 @@ function filterTable(type, btn) {
     
     rows.forEach(row => {
         const rTime = parseFloat(row.querySelector('.retention-cell').innerText) || 0;
+        const bRate = parseFloat(row.querySelector('.bounce-cell').innerText) || 0;
+        
         if (type === 'bad') {
-            if (rTime < 90) row.style.display = '';
+            // Фильтр показывает всё, что имеет критические или предупреждающие параметры
+            if (rTime < 90 || bRate > 30) row.style.display = '';
             else row.style.display = 'none';
         } else {
             row.style.display = '';
@@ -290,7 +295,7 @@ function startAdvancedAnalysis() {
     let logs = [
         "> Initializing core database lookup context...",
         "> Correlating Product Retention times with UI checkout calls...",
-        "> Computing high bounce anomalies...",
+        "> Computing high bounce anomalies and exit-rate metrics...",
         "> Analysis completed. Generating architectural recommendations..."
     ];
 
@@ -308,7 +313,9 @@ function startAdvancedAnalysis() {
             aiOutput.style.display = "none";
             
             let worstProduct = "None";
+            let highestBounceProduct = "None";
             let lowestRetention = 99999;
+            let maxBounce = 0;
             let totalBounce = 0;
             let count = 0;
 
@@ -319,9 +326,14 @@ function startAdvancedAnalysis() {
                 
                 totalBounce += bnc;
                 count++;
+                
                 if (ret < lowestRetention) {
                     lowestRetention = ret;
                     worstProduct = name;
+                }
+                if (bnc > maxBounce) {
+                    maxBounce = bnc;
+                    highestBounceProduct = name;
                 }
             });
 
@@ -330,41 +342,22 @@ function startAdvancedAnalysis() {
             let priorityLevel = "";
             let metricColor = "";
 
-            if (lowestRetention < 50 || avgBounce > 60) {
-                priorityLevel = "CRITICAL LEAK";
+            // ИИ-анализ теперь напрямую реагирует на аномально высокий Bounce Rate (>= 60%)
+            if (maxBounce >= 60 || lowestRetention < 50) {
+                priorityLevel = "CRITICAL LEAK DETECTED";
                 metricColor = "#f87171";
-                technicalAdvice = `Critical drop-off identified on <strong>"${worstProduct}"</strong>. Immediate actions required: fix media assets, resolve page load speed lag, and optimize mobile layouts to lower the bounce rate.`;
+                
+                if (maxBounce >= 60) {
+                    technicalAdvice = `High Bounce Rate anomaly discovered on <strong>"${highestBounceProduct}" (${maxBounce}%)</strong>. Users are bouncing instantly. <em>AI Recommendation:</em> Audit page configuration, compress large graphical blocks, fix possible JS errors causing layout shift, and align call-to-action buttons.`;
+                } else {
+                    technicalAdvice = `Critical drop-off identified on <strong>"${worstProduct}"</strong> due to low retention time (${lowestRetention}s). Optimize description layout and product images to increase engagement.`;
+                }
             } else {
                 priorityLevel = "STABLE ENGAGEMENT";
                 metricColor = "#4ade80";
-                technicalAdvice = "User behavior indicators stay within safe thresholds. Continue typical continuous optimization routines.";
+                technicalAdvice = "User behavior indicators stay within safe thresholds. High bounce rate logs are clean. Continue continuous asset delivery optimizations.";
             }
 
             statusText.innerText = "System Scan Finished.";
             reportBox.innerHTML = `
-                <h4 style="margin-bottom:12px; font-size:1.1rem; color:#fff;"><i class="fas fa-file-medical-alt"></i> Store Bottleneck Diagnostic Report</h4>
-                <p style="margin:5px 0;"><strong>1. Calculated Store-wide Averages:</strong></p>
-                <ul style="margin-left:20px; color:#94a3b8; font-size:0.9rem;">
-                    <li>Average System Bounce Rate: <strong style="color:#fff;">${avgBounce}%</strong></li>
-                    <li>Lowest Product Interaction Threshold: <strong style="color:#fff;">${lowestRetention}s</strong></li>
-                </ul>
-                <p style="margin:12px 0 5px 0;"><strong>2. Discovered Operational Bottlenecks:</strong></p>
-                <p style="margin:5px 0; font-weight:600; color:${metricColor};">${priorityLevel}</p>
-                <p style="background:rgba(15,23,42,0.4); padding:12px; border-radius:6px; font-size:0.9rem; margin-top:8px; border-left:3px solid ${metricColor};">${technicalAdvice}</p>
-            `;
-            reportBox.style.display = "block";
-            btn.disabled = false;
-        }
-    }, 800);
-}
-</script>
-
-<footer>
-    <div class="footer-content">
-        <p><strong>Ubaidulla S., Baisenbekov I. | ICT Project</strong></p>
-        <p>Narxoz University | School of Information Technologies | Information Systems</p>
-    </div>
-</footer>
-
-</body>
-</html>
+                <h4 style="margin-bottom:1
