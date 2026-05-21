@@ -27,39 +27,46 @@
     </section>
 
     <section class="analytics-intro">
-        <h2><i class="fas fa-chart-bar"></i> Platform Relevance</h2>
+        <h2><i class="fas fa-chart-line"></i> Platform Relevance</h2>
         <p>In modern e-commerce, tracking how long a user interacts with a product page is critical. Low customer retention time directly correlates with a high drop-off rate at checking out. This analytical platform automates bottleneck discovery and highlights exact segments where your store loses engagement and revenue.</p>
     </section>
 
     <section class="media-section">
         <h2><i class="fas fa-layer-group"></i> Analytical Overview</h2>
-        <div class="media-container">
+        <div class="media-container" style="display: flex; gap: 30px; flex-wrap: wrap; margin-top: 20px;">
             
             <div class="media-card" style="flex: 1; min-width: 300px;">
                 <h3><i class="fas fa-video"></i> Video Introduction</h3>
                 <div style="position: relative; padding-top: 56.25%; background: #1e293b; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
                     <iframe 
-                        src="https://app.heygen.com/embed/a1a2bc06c6c04cd98c9b66f59b201273" 
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" 
-                        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" 
+                        width="560" 
+                        height="315" 
+                        src="https://app.heygen.com/embeds/a1a2bc06c6c04cd98c9b66f59b201273" 
+                        title="Avatar IV Video" 
+                        frameborder="0" 
+                        allow="encrypted-media; fullscreen;" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
                         allowfullscreen>
                     </iframe>
                 </div>
                 <p style="margin-top:12px; font-size:0.9rem; color:#94a3b8;">Review our automation pipeline mapping customer engagement strategies.</p>
             </div>
 
-            <div class="media-card" style="flex: 1; min-width: 300px;">
-                <h3><i class="fas fa-volume-up"></i> Focus Background Track</h3>
-                <p style="font-size:0.9rem; color:#94a3b8; margin-bottom: 15px;">Ambient track designed to increase productivity during business analysis dashboards.</p>
-                <div style="background: rgba(15, 23, 42, 0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                    <audio id="bgMusic" loop style="width: 100%; display: none;">
-                        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-                    </audio>
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="document.getElementById('bgMusic').play()" style="padding:8px 16px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:0.85rem;"><i class="fas fa-play"></i> Play</button>
-                        <button onclick="document.getElementById('bgMusic').pause()" style="padding:8px 16px; background:rgba(255,255,255,0.05); color:#94a3b8; border:1px solid rgba(255,255,255,0.08); border-radius:6px; cursor:pointer; font-size:0.85rem;"><i class="fas fa-pause"></i> Pause</button>
+            <div class="media-card" style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h3><i class="fas fa-volume-up"></i> Focus Background Track</h3>
+                    <p style="font-size:0.9rem; color:#94a3b8; margin-bottom: 15px;">Ambient track designed to increase productivity during business analysis dashboards.</p>
+                    <div style="background: rgba(15, 23, 42, 0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <audio id="bgMusic" loop style="width: 100%; display: none;">
+                            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+                        </audio>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="document.getElementById('bgMusic').play()" style="padding:10px 18px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight: 600;"><i class="fas fa-play"></i> Play</button>
+                            <button onclick="document.getElementById('bgMusic').pause()" style="padding:10px 18px; background:rgba(255,255,255,0.05); color:#94a3b8; border:1px solid rgba(255,255,255,0.08); border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight: 600;"><i class="fas fa-pause"></i> Pause</button>
+                        </div>
                     </div>
                 </div>
+                <div style="height: 10px;"></div>
             </div>
 
         </div>
