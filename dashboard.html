@@ -98,4 +98,82 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
             <div>
                 <h3 style="color:#fff; font-size: 1.15rem;"><i class="fas fa-exclamation-triangle" style="color: #cbd5e1;"></i> Automated Bottleneck Detection Engine</h3>
-                <p id="engineStatus" style="margin: 8px 0 0 0
+                <p id="engineStatus" style="margin: 8px 0 0 0; color: #64748b; font-size: 0.95rem;">System idle. Ready to parse product metrics for leaks...</p>
+            </div>
+            <button onclick="startAdvancedAnalysis()" id="aiBtn" style="padding: 12px 24px; background: #334155; color: white; border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; font-weight: bold; cursor: pointer; font-size:0.85rem;">
+                Run Leak Analysis
+            </button>
+        </div>
+        <div class="progress-container" id="progCont" style="width: 100%; background: #1e293b; height: 6px; border-radius: 3px; margin: 20px 0; display: none;">
+            <div class="progress-bar" id="progBar" style="width: 0%; height: 100%; background: #64748b; border-radius: 3px; transition: width 0.15s;"></div>
+        </div>
+        <div id="aiOutput" style="margin-top: 20px; font-family: monospace; color: #94a3b8; display: none; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; font-size:0.85rem;"></div>
+        <div class="ai-report-box" id="aiReportBox" style="background: rgba(30, 41, 59, 0.6); border-left: 3px solid #64748b; padding: 20px; margin-top: 20px; border-radius: 6px; display: none; color: #cbd5e1;"></div>
+    </section>
+</main>
+
+<script>
+let behaviorChart;
+const defaultData = [
+    { product: "Premium Leather Jacket", retention: "145", bounce: "24" },
+    { product: "Wireless Bluetooth Earbuds", retention: "85", bounce: "42" },
+    { product: "Minimalist Ceramic Mug", retention: "35", bounce: "78" },
+    { product: "Ergonomic Office Chair", retention: "190", bounce: "18" }
+];
+
+window.onload = function() {
+    Chart.defaults.color = '#94a3b8';
+    const ctx = document.getElementById('behaviorChart').getContext('2d');
+    
+    behaviorChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Optimal Status', 'Warning Status', 'Critical Status'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                borderColor: '#0f172a',
+                borderWidth: 2
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: { font: { weight: '600' } }
+                } 
+            } 
+        }
+    });
+    
+    loadTableData();
+};
+
+function saveTableToStorage() {
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    let tableArr = [];
+    rows.forEach(row => {
+        tableArr.push({
+            product: row.cells[0].innerText.trim(),
+            retention: row.cells[1].innerText.trim(),
+            bounce: row.cells[2].innerText.trim()
+        });
+    });
+    localStorage.setItem('storeBehaviorData', JSON.stringify(tableArr));
+}
+
+function loadTableData() {
+    let storedData = localStorage.getItem('storeBehaviorData');
+    let dataToRender = (storedData && JSON.parse(storedData).length > 0) ? JSON.parse(storedData) : defaultData;
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    
+    dataToRender.forEach(item => {
+        const newTr = document.createElement('tr');
+        newTr.innerHTML = `
+            <td contenteditable="true" oninput="handleTableChange()">${item.product}</td>
+            <td contenteditable="true" class="retention-cell" oninput="handleTableChange()">${item.retention}</td>
+            <td contenteditable="true" class="bounce-cell" oninput="handleTableChange()">${item.bounce}</td>
+            <td class="status-
