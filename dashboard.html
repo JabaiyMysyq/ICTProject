@@ -1,63 +1,216 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>StoreAnalytics | Dashboard</title>
+    <title>Аналитическая Панель | DataQuality</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .dashboard-container { max-width: 1200px; margin: 0 auto; width: 100%; padding: 20px; box-sizing: border-box; }
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 380px; gap: 30px; margin-top: 25px; align-items: start; }
-        @media (max-width: 992px) { .dashboard-grid { grid-template-columns: 1fr; } }
-        
-        .table-visible-wrapper { width: 100%; overflow-x: auto; background: rgba(30, 41, 59, 0.3); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 20px; }
-        .white-data-table { width: 100%; border-collapse: collapse; color: #ffffff; }
-        .white-data-table th { background-color: #1e293b; color: #cbd5e1; padding: 14px; font-weight: 600; text-align: left; font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .white-data-table td { padding: 12px 14px; font-size: 0.9rem; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
-        
-        .add-row-form-panel { background: rgba(30, 41, 59, 0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; gap: 12px; flex-wrap: wrap; }
-        .add-row-form-panel input { padding: 10px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; color: #ffffff; outline: none; font-size: 0.9rem; }
-        .add-row-form-panel input:focus { border-color: #64748b; }
-        
-        .btn-action { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; font-size: 0.85rem; }
-        .btn-add { background: #334155; color: white; border: 1px solid rgba(255,255,255,0.05); }
-        .btn-add:hover { background: #475569; }
-        .btn-delete { background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(239,68,68,0.2); }
-        .btn-delete:hover { background: #ef4444; color: white; }
-        .btn-reset-table { background: transparent; color: #64748b; border: 1px solid rgba(255, 255, 255, 0.08); margin-left: 10px; }
-        .btn-reset-table:hover { background: rgba(255,255,255,0.02); color: #94a3b8; }
-        
-        .filter-btn { background: rgba(255, 255, 255, 0.02); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.06); padding: 6px 14px; border-radius: 6px; cursor: pointer; }
-        .filter-btn.active { background: #334155; color: white; border-color: rgba(255,255,255,0.1); }
-        .chart-glass-box { background: rgba(30, 41, 59, 0.3); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        .badge-optimal { background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(16,185,129,0.3); }
-        .badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(245,158,11,0.3); }
-        .badge-critical { background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(239,68,68,0.3); }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 30px;
+            margin-top: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-grid { 
+                grid-template-columns: 1fr; 
+            }
+        }
+
+        .table-visible-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .white-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #f1f5f9;
+        }
+
+        .white-data-table th {
+            background-color: #1e293b;
+            color: #94a3b8;
+            padding: 16px;
+            font-weight: 600;
+            text-align: left;
+            font-size: 0.9rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .white-data-table td {
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+        }
+
+        .add-row-panel {
+            background: rgba(30, 41, 59, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .add-row-panel input {
+            padding: 12px 16px;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .add-row-panel input:focus {
+            border-color: #1abc9c;
+            box-shadow: 0 0 8px rgba(26, 188, 156, 0.2);
+        }
+
+        .btn-action {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-add {
+            background: #1abc9c;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #16a085;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-reset {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #1abc9c;
+            color: white;
+            border-color: #1abc9c;
+        }
+
+        .chart-glass-box {
+            background: rgba(30, 41, 59, 0.3);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* ЯРКИЕ НЕОНОВЫЕ СТАТУС-БАДЖИ */
+        .badge-optimal { 
+            background: rgba(16, 185, 129, 0.15); 
+            color: #10b981; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-weight: 700; 
+            font-size: 0.8rem; 
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            text-transform: uppercase;
+        }
+        .badge-warning { 
+            background: rgba(245, 158, 11, 0.15); 
+            color: #f59e0b; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-weight: 700; 
+            font-size: 0.8rem; 
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            text-transform: uppercase;
+        }
+        .badge-critical { 
+            background: rgba(239, 68, 68, 0.15); 
+            color: #ef4444; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-weight: 700; 
+            font-size: 0.8rem; 
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
 
 <header>
     <nav>
-        <div class="logo">StoreAnalytics <span>| Metrics</span></div>
+        <div class="logo">DataQuality 📊</div>
         <div class="menu">
-            <a href="index.html">Overview</a>
-            <a href="dashboard.html" class="active">Behavior Dashboard</a>
-            <a href="bot.html">Retention Assistant</a>
-            <a href="creators.html">Team</a>
+            <a href="index.html">Главная</a>
+            <a href="dashboard.html" class="active">Анализ данных</a>
+            <a href="bot.html">Помощник по качеству</a>
+            <a href="creators.html">Авторы</a>
         </div>
     </nav>
 </header>
 
 <main class="dashboard-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
-        <h2><i class="fas fa-chart-pie" style="color: #94a3b8;"></i> Customer Retention Dataset</h2>
-        <div>
-            <button class="filter-btn active" onclick="filterTable('all', this)">All Products</button>
-            <button class="filter-btn" onclick="filterTable('bad', this)">Bottlenecks</button>
-            <button class="btn-action btn-reset-table" onclick="resetToDefaultData()"><i class="fas fa-undo"></i> Reset Storage</button>
+        <h2><i class="fas fa-database" style="color: #1abc9c;"></i> Мониторинг системных метрик</h2>
+        <div style="display: flex; gap: 10px;">
+            <button class="filter-btn active" onclick="filterTable('all', this)">Все узлы</button>
+            <button class="filter-btn" onclick="filterTable('bad', this)">Критические риски</button>
+            <button class="btn-action btn-reset" onclick="resetToDefaultData()"><i class="fas fa-undo"></i> Сбросить хранилище</button>
         </div>
     </div>
 
@@ -67,58 +220,262 @@
                 <table id="dataTable" class="white-data-table">
                     <thead>
                         <tr>
-                            <th>Product Name</th>
-                            <th>Retention Time (sec)</th>
-                            <th>Bounce Rate (%)</th>
-                            <th>Engagement Status</th>
-                            <th>Action</th>
+                            <th>Наименование системы</th>
+                            <th>Полнота данных (%)</th>
+                            <th>Bounce Rate / Отказы (%)</th>
+                            <th>Статус качества</th>
+                            <th>Действие</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
 
-            <div class="add-row-form-panel">
-                <input type="text" id="newProduct" placeholder="Product / Category Name" style="flex: 2; min-width: 150px;">
-                <input type="number" id="newRetention" placeholder="Retention (sec)" style="flex: 1; min-width: 80px;">
-                <input type="number" id="newBounce" placeholder="Bounce Rate (%)" style="flex: 1; min-width: 80px;">
-                <button class="btn-action btn-add" onclick="addNewRow()"><i class="fas fa-plus"></i> Add Entry</button>
+            <div class="add-row-panel">
+                <input type="text" id="newSystemName" placeholder="Название СУБД / Системы" style="flex: 2; min-width: 180px;">
+                <input type="number" id="newAccuracy" placeholder="Полнота (0-100%)" style="flex: 1; min-width: 100px;">
+                <input type="number" id="newBounce" placeholder="Отказы (0-100%)" style="flex: 1; min-width: 100px;">
+                <button class="btn-action btn-add" onclick="addNewRow()"><i class="fas fa-plus"></i> Добавить запись</button>
             </div>
         </div>
 
         <div class="chart-glass-box">
-            <h3 style="color:#fff; margin:0 0 20px 0; font-size:1rem; font-weight:600;">Status Spectrum</h3>
-            <div style="position: relative; height: 220px; display: flex; justify-content: center;">
-                <canvas id="behaviorChart"></canvas>
+            <h3 style="color:#fff; margin:0 0 20px 0; font-size:1.1rem; font-weight:600; text-align: center;">Спектр состояний ИТ-архитектуры</h3>
+            <div style="position: relative; height: 240px; display: flex; justify-content: center;">
+                <canvas id="qualityChart"></canvas>
             </div>
         </div>
     </div>
 
-    <section class="ai-control-panel" style="background: rgba(30, 41, 59, 0.3); padding: 30px; border-radius: 12px; margin-top: 40px; border: 1px solid rgba(255,255,255,0.05);">
+    <section class="ai-control-panel" style="background: rgba(30, 41, 59, 0.4); padding: 30px; border-radius: 16px; margin-top: 40px; border: 1px solid rgba(255,255,255,0.05);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
             <div>
-                <h3 style="color:#fff; font-size: 1.15rem;"><i class="fas fa-exclamation-triangle" style="color: #cbd5e1;"></i> Automated Bottleneck Detection Engine</h3>
-                <p id="engineStatus" style="margin: 8px 0 0 0; color: #64748b; font-size: 0.95rem;">System idle. Ready to parse product metrics for leaks...</p>
+                <h3 style="color:#fff; font-size: 1.2rem;"><i class="fas fa-robot" style="color: #1abc9c;"></i> Интеллектуальный ИИ-аудитор аномалий</h3>
+                <p id="engineStatus" style="margin: 8px 0 0 0; color: #94a3b8; font-size: 0.95rem;">Модуль ИИ ожидает запуска анализа структуры данных...</p>
             </div>
-            <button onclick="startAdvancedAnalysis()" id="aiBtn" style="padding: 12px 24px; background: #334155; color: white; border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; font-weight: bold; cursor: pointer; font-size:0.85rem;">
-                Run Leak Analysis
+            <button onclick="startAdvancedAnalysis()" id="aiBtn" style="padding: 14px 28px; background: #1abc9c; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size:0.9rem; transition: background 0.2s;">
+                Запустить ИИ-Анализ утечек
             </button>
         </div>
+        
         <div class="progress-container" id="progCont" style="width: 100%; background: #1e293b; height: 6px; border-radius: 3px; margin: 20px 0; display: none;">
-            <div class="progress-bar" id="progBar" style="width: 0%; height: 100%; background: #64748b; border-radius: 3px; transition: width 0.15s;"></div>
+            <div class="progress-bar" id="progBar" style="width: 0%; height: 100%; background: #1abc9c; border-radius: 3px; transition: width 0.15s;"></div>
         </div>
-        <div id="aiOutput" style="margin-top: 20px; font-family: monospace; color: #94a3b8; display: none; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; font-size:0.85rem;"></div>
-        <div class="ai-report-box" id="aiReportBox" style="background: rgba(30, 41, 59, 0.6); border-left: 3px solid #64748b; padding: 20px; margin-top: 20px; border-radius: 6px; display: none; color: #cbd5e1;"></div>
+        
+        <div id="aiOutput" style="margin-top: 20px; font-family: monospace; color: #94a3b8; display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; font-size:0.85rem; border: 1px solid rgba(255,255,255,0.05);"></div>
+        <div class="ai-report-box" id="aiReportBox" style="background: rgba(15, 23, 42, 0.6); border-left: 4px solid #1abc9c; padding: 25px; margin-top: 20px; border-radius: 8px; display: none; color: #cbd5e1;"></div>
     </section>
 </main>
 
 <script>
-let behaviorChart;
+let qualityChart;
 const defaultData = [
-    { product: "Premium Leather Jacket", retention: "145", bounce: "24" },
-    { product: "Wireless Bluetooth Earbuds", retention: "85", bounce: "42" },
-    { product: "Minimalist Ceramic Mug", retention: "35", bounce: "78" },
-    { product: "Ergonomic Office Chair", retention: "190", bounce: "18" }
+    { system: "Центральная БД Oracle", accuracy: "98", bounce: "12" },
+    { system: "Клиентская CRM Модуль", accuracy: "84", bounce: "35" },
+    { system: "Складской учет ERP", accuracy: "42", bounce: "65" },
+    { system: "Аналитическая витрина BI", accuracy: "91", bounce: "18" }
 ];
 
-window.onload = function()
+// ИСПРАВЛЕНО: Все функции объявлены корректно и доступны до вызова
+window.onload = function() {
+    Chart.defaults.color = '#94a3b8';
+    const ctx = document.getElementById('qualityChart').getContext('2d');
+    
+    qualityChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Оптимально', 'Предупреждение', 'Критический риск'],
+            datasets: [{
+                data: [0, 0, 0],
+                // ЯРКИЕ КИСЛОТНЫЕ НЕОНОВЫЕ ЦВЕТА
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                borderColor: '#0f172a',
+                borderWidth: 2
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: { font: { weight: '600', size: 11 } }
+                } 
+            } 
+        }
+    });
+    
+    loadTableData();
+};
+
+function saveTableToStorage() {
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    let tableArr = [];
+    rows.forEach(row => {
+        tableArr.push({
+            system: row.cells[0].innerText.trim(),
+            accuracy: row.cells[1].innerText.trim(),
+            bounce: row.cells[2].innerText.trim()
+        });
+    });
+    localStorage.setItem('dataQualityMatrix', JSON.stringify(tableArr));
+}
+
+function loadTableData() {
+    let storedData = localStorage.getItem('dataQualityMatrix');
+    let dataToRender = (storedData && JSON.parse(storedData).length > 0) ? JSON.parse(storedData) : defaultData;
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    
+    dataToRender.forEach(item => {
+        const newTr = document.createElement('tr');
+        newTr.innerHTML = `
+            <td contenteditable="true" oninput="handleTableChange()">${item.system}</td>
+            <td contenteditable="true" class="accuracy-cell" oninput="handleTableChange()">${item.accuracy}</td>
+            <td contenteditable="true" class="bounce-cell" oninput="handleTableChange()">${item.bounce}</td>
+            <td class="status-cell"></td>
+            <td><button class="btn-action btn-delete" onclick="deleteRow(this)"><i class="fas fa-trash-alt"></i></button></td>
+        `;
+        tbody.appendChild(newTr);
+    });
+    calculateStatuses();
+}
+
+function handleTableChange() {
+    saveTableToStorage();
+    calculateStatuses();
+    resetAnalysisState();
+}
+
+function calculateStatuses() {
+    let optimalCount = 0, warningCount = 0, criticalCount = 0;
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    
+    rows.forEach(row => {
+        const accuracy = parseFloat(row.querySelector('.accuracy-cell').innerText) || 0;
+        const bounce = parseFloat(row.querySelector('.bounce-cell').innerText) || 0;
+        const statusCell = row.querySelector('.status-cell');
+        
+        // Комплексная связанная валидация: статус зависит и от полноты, и от Bounce Rate
+        if (accuracy >= 90 && bounce <= 25) {
+            statusCell.innerHTML = '<span class="badge-optimal">Optimal</span>';
+            optimalCount++;
+        } else if (accuracy < 60 || bounce >= 55) {
+            statusCell.innerHTML = '<span class="badge-critical">Critical</span>';
+            criticalCount++;
+        } else {
+            statusCell.innerHTML = '<span class="badge-warning">Warning</span>';
+            warningCount++;
+        }
+    });
+
+    if (qualityChart) {
+        qualityChart.data.datasets[0].data = [optimalCount, warningCount, criticalCount];
+        qualityChart.update();
+    }
+}
+
+function addNewRow() {
+    const sName = document.getElementById('newSystemName').value.trim();
+    const accuracy = document.getElementById('newAccuracy').value.trim();
+    const bounce = document.getElementById('newBounce').value.trim();
+
+    if (!sName || !accuracy || !bounce) {
+        alert("Пожалуйста, заполните все поля ввода для регистрации метрик.");
+        return;
+    }
+
+    const tbody = document.getElementById('tableBody');
+    const newTr = document.createElement('tr');
+    newTr.innerHTML = `
+        <td contenteditable="true" oninput="handleTableChange()">${sName}</td>
+        <td contenteditable="true" class="accuracy-cell" oninput="handleTableChange()">${accuracy}</td>
+        <td contenteditable="true" class="bounce-cell" oninput="handleTableChange()">${bounce}</td>
+        <td class="status-cell"></td>
+        <td><button class="btn-action btn-delete" onclick="deleteRow(this)"><i class="fas fa-trash-alt"></i></button></td>
+    `;
+    tbody.appendChild(newTr);
+    
+    document.getElementById('newSystemName').value = '';
+    document.getElementById('newAccuracy').value = '';
+    document.getElementById('newBounce').value = '';
+
+    handleTableChange();
+}
+
+function deleteRow(btn) {
+    btn.closest('tr').remove();
+    handleTableChange();
+}
+
+function resetToDefaultData() {
+    if(confirm("Восстановить исходную заводскую матрицу систем?")) {
+        localStorage.removeItem('dataQualityMatrix');
+        loadTableData();
+        resetAnalysisState();
+    }
+}
+
+function filterTable(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    
+    rows.forEach(row => {
+        const accuracy = parseFloat(row.querySelector('.accuracy-cell').innerText) || 0;
+        const bounce = parseFloat(row.querySelector('.bounce-cell').innerText) || 0;
+        
+        if (type === 'bad') {
+            if (accuracy < 90 || bounce > 25) row.style.display = '';
+            else row.style.display = 'none';
+        } else {
+            row.style.display = '';
+        }
+    });
+}
+
+function resetAnalysisState() {
+    document.getElementById('engineStatus').innerText = "Данные изменены. Требуется повторный запуск ИИ-сканера.";
+    document.getElementById('aiReportBox').style.display = "none";
+}
+
+function startAdvancedAnalysis() {
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    if (rows.length === 0) {
+        alert("Таблица пуста. Нечего анализировать.");
+        return;
+    }
+
+    const btn = document.getElementById('aiBtn');
+    const progCont = document.getElementById('progCont');
+    const progBar = document.getElementById('progBar');
+    const aiOutput = document.getElementById('aiOutput');
+    const reportBox = document.getElementById('aiReportBox');
+    const statusText = document.getElementById('engineStatus');
+
+    btn.disabled = true;
+    reportBox.style.display = "none";
+    aiOutput.style.display = "block";
+    progCont.style.display = "block";
+    progBar.style.width = "0%";
+    statusText.innerText = "ИИ сканирует логи целостности и отказов...";
+
+    let logs = [
+        "> Загрузка ИИ-модели DataGovernance-v4...",
+        "> Проверка корреляции целостности систем с Bounce Rate...",
+        "> Обнаружение критических пиков отказов и пустых кортежей...",
+        "> Формирование архитектурного отчета по оптимизации..."
+    ];
+
+    let logIdx = 0;
+    aiOutput.innerHTML = logs[0];
+    
+    let interval = setInterval(() => {
+        logIdx++;
+        if(logIdx < logs.length) {
+            aiOutput.innerHTML += "<br>" + logs[logIdx];
+            progBar.style.width = (logIdx * 25) + "%";
+        } else {
+            clearInterval(interval);
+            progCont.style.display = "none";
+            aiOutput.style.display = "none";
