@@ -1,0 +1,180 @@
+/* ==========================================
+   GENERAL SETTINGS & STRICT DARK THEME
+   ========================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background: #0f172a; /* Deep Slate Navy */
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(71, 85, 105, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(51, 65, 85, 0.15) 0px, transparent 50%);
+    color: #f1f5f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    padding: 40px 20px;
+}
+
+/* ==========================================
+   NAVIGATION (STRICT GLASSMORPHISM)
+   ========================================== */
+header {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.5px;
+}
+
+.logo span {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.menu {
+    display: flex;
+    gap: 10px;
+}
+
+.menu a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.menu a:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.menu a.active {
+    color: #fff;
+    background: #334155; /* Slate Gray */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================
+   HERO SECTION
+   ========================================== */
+.hero {
+    text-align: center;
+    padding: 50px 20px;
+    background: rgba(30, 41, 59, 0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+}
+
+.hero h1 {
+    font-size: 2.4rem;
+    color: #ffffff;
+    margin-bottom: 12px;
+}
+
+.hero p {
+    color: #94a3b8;
+    font-size: 1.05rem;
+    max-width: 750px;
+    margin: 0 auto;
+}
+
+/* ==========================================
+   CONTENT BLOCKS & CARDS
+   ========================================== */
+.analytics-intro, .media-section {
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+}
+
+h2 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+h2 i {
+    color: #94a3b8;
+}
+
+p {
+    line-height: 1.6;
+    color: #cbd5e1;
+}
+
+.media-container, .grid-container {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.media-card, .card {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 25px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.media-card:hover, .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.media-card h3, .card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+    color: #fff;
+}
+
+/* ==========================================
+   FOOTER STYLE
+   ========================================== */
+footer {
+    background: rgba(15, 23, 42, 0.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 20px;
+    margin-top: auto;
+    font-size: 0.85rem;
+    color: #64748b;
+    text-align: center;
+}
+
+footer strong {
+    color: #94a3b8;
+}

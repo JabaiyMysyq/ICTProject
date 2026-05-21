@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>StoreAnalytics | Retention Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        #chat-box { 
+            border: 1px solid rgba(255,255,255,0.05); padding: 20px; height: 380px; margin-bottom: 15px; 
+            background: rgba(30, 41, 59, 0.2); overflow-y: auto; border-radius: 8px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .msg { padding: 10px 14px; border-radius: 8px; max-width: 80%; font-size: 0.9rem; line-height: 1.5; }
+        .user-msg { background: #334155; color: white; align-self: flex-end; border: 1px solid rgba(255,255,255,0.05); }
+        .bot-msg { background: rgba(30, 41, 59, 0.6); color: #cbd5e1; align-self: flex-start; border: 1px solid rgba(30, 41, 59, 0.03); }
+        .chat-input-area { display: flex; gap: 10px; }
+        #userInput { flex: 1; padding: 12px; border-radius: 6px; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); color:#fff; outline: none; font-size:0.9rem; }
+        #userInput:focus { border-color: #64748b; }
+        #sendBtn { padding: 10px 22px; background: #334155; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size:0.85rem; }
+        #sendBtn:hover { background: #475569; }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <div class="logo">StoreAnalytics <span>| Metrics</span></div>
+        <div class="menu">
+            <a href="index.html">Overview</a>
+            <a href="dashboard.html">Behavior Dashboard</a>
+            <a href="bot.html" class="active">Retention Assistant</a>
+            <a href="creators.html">Team</a>
+        </div>
+    </nav>
+</header>
+
+<main style="max-width:800px; margin:0 auto; width:100%;">
+    <h2><i class="fas fa-robot"></i> Behavioral Consult Assistant</h2>
+    <p style="margin-bottom:20px; color:#64748b;">Inquire about retention time metrics, reducing e-commerce bounce rates, or maximizing customer experience values.</p>
+    
+    <div id="chat-box">
+        <div class="msg bot-msg">Hello. I am your specialized E-commerce Retention Engine consultant. I can assist you with user experience frameworks, conversion leak fixes, and behavioral metrics interpretation. Try asking: "How to fix high bounce rate?" or "What is retention time?".</div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="userInput" placeholder="Type an analytical question here...">
+        <button id="sendBtn" onclick="askBot()">Send</button>
+    </div>
+</main>
+
+<script>
+async function askBot() {
+    const inputField = document.getElementById('userInput');
+    let query = inputField.value.trim();
+    const chatBox = document.getElementById('chat-box');
+    if (!query) return;
+
+    chatBox.innerHTML += `<div class="msg user-msg">${query}</div>`;
+    inputField.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const loadId = "load-" + Date.now();
+    chatBox.innerHTML += `<div class="msg bot-msg" id="${loadId}"><i class="fas fa-spinner fa-spin"></i> Processing metrics context...</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    setTimeout(async () => {
+        const botMessageElem = document.getElementById(loadId);
+        let lowerQuery = query.toLowerCase();
+
+        if (lowerQuery.includes("bounce") || lowerQuery.includes("bounce rate")) {
+            botMessageElem.innerHTML = "<strong>Retention Advice:</strong> High bounce rates indicate that product pages fail to capture attention instantly. Consider reducing layout shift, optimizing critical image assets, and structuring price tiers clearly above the fold.";
+        } else if (lowerQuery.includes("retention") || lowerQuery.includes("retention time")) {
+            botMessageElem.innerHTML = "<strong>Metric Definition:</strong> Customer Retention Time tracks the continuous duration a unique session keeps a product viewport active. Values over 90 seconds showcase strong purchase consideration indicators.";
+        } else if (lowerQuery.includes("optimize") || lowerQuery.includes("conversion")) {
+            botMessageElem.innerHTML = "<strong>Strategy Guide:</strong> Streamline multi-stage customer interactions. Implement quick preview carts, remove strict signup dependencies before checking out, and embed contextual product recommendations.";
+        } else {
+            try {
+                const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
+                const data = await res.json();
+                if(data.query.search.length > 0) {
+                    botMessageElem.innerHTML = `<strong>Discovered Context:</strong> ${data.query.search[0].snippet}... For custom architectural fixes, please contact your data system administrator.`;
+                } else {
+                    botMessageElem.innerHTML = "No definitive behavioral patterns found for this specific query. Please rephrase or alter input metrics terms.";
+                }
+            } catch(e) {
+                botMessageElem.innerHTML = "Knowledge communication loop failed. Ensure connection parameters are functional.";
+            }
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }, 1000);
+}
+
+document.getElementById('userInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') askBot();
+});
+</script>
+
+<footer>
+    <div class="footer-content">
+        <p><strong>Ubaidulla S., Baisenbekov I. | ICT Project</strong></p>
+        <p>Narxoz University | School of Information Technologies | Information Systems</p>
+    </div>
+</footer>
+
+</body>
+</html>
