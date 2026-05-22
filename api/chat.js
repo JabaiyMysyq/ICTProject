@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         const groqMessages = [
             {
                 role: 'system',
-                content: 'Ты — опытный консультант по качеству данных. Отвечай ТОЛЬКО на русском языке. Специализируешься на: очистке данных, дедупликации, валидации, метриках качества (полнота, точность, согласованность), Data Governance, ETL. Отвечай кратко и структурировано — не более 5 пунктов.'
+                content: 'You are an expert E-commerce Retention and Behavioral Analytics consultant. Answer ONLY in English. You specialize in: bounce rate optimization, customer retention metrics, conversion rate improvement, UX strategy, cart abandonment reduction, customer lifetime value, A/B testing, and behavioral analytics. Give concise, practical answers — no more than 5 bullet points or sentences.'
             },
             ...messages
         ];
