@@ -7,18 +7,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         #chat-box { 
-            border: 1px solid rgba(255,255,255,0.05); padding: 20px; height: 380px; margin-bottom: 15px; 
+            border: 1px solid rgba(255,255,255,0.05); padding: 20px; height: 420px; margin-bottom: 15px; 
             background: rgba(30, 41, 59, 0.2); overflow-y: auto; border-radius: 8px;
             display: flex; flex-direction: column; gap: 12px;
         }
-        .msg { padding: 10px 14px; border-radius: 8px; max-width: 80%; font-size: 0.9rem; line-height: 1.5; }
-        .user-msg { background: #334155; color: white; align-self: flex-end; border: 1px solid rgba(255,255,255,0.05); }
-        .bot-msg { background: rgba(30, 41, 59, 0.6); color: #cbd5e1; align-self: flex-start; border: 1px solid rgba(30, 41, 59, 0.03); }
+        .msg { padding: 10px 14px; border-radius: 8px; max-width: 80%; font-size: 0.9rem; line-height: 1.6; }
+        .msg .sender-label { font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; opacity: 0.6; display: block; }
+        .user-msg { background: #334155; color: white; align-self: flex-end; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px 8px 3px 8px; }
+        .bot-msg { background: rgba(30, 41, 59, 0.6); color: #cbd5e1; align-self: flex-start; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px 8px 8px 3px; }
         .chat-input-area { display: flex; gap: 10px; }
-        #userInput { flex: 1; padding: 12px; border-radius: 6px; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); color:#fff; outline: none; font-size:0.9rem; }
+        #userInput { flex: 1; padding: 12px; border-radius: 6px; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); color:#fff; outline: none; font-size:0.9rem; font-family: inherit; }
         #userInput:focus { border-color: #64748b; }
-        #sendBtn { padding: 10px 22px; background: #334155; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size:0.85rem; }
-        #sendBtn:hover { background: #475569; }
+        #userInput:disabled { opacity: 0.5; cursor: not-allowed; }
+        #sendBtn { padding: 10px 22px; background: #334155; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size:0.85rem; transition: background 0.2s; }
+        #sendBtn:hover:not(:disabled) { background: #475569; }
+        #sendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .quick-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .quick-btn { padding: 6px 14px; background: rgba(30,41,59,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; font-size: 0.8rem; color: #94a3b8; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .quick-btn:hover { background: #334155; color: white; border-color: #475569; }
+        .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #94a3b8; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -38,61 +46,130 @@
 <main style="max-width:800px; margin:0 auto; width:100%;">
     <h2><i class="fas fa-robot"></i> Behavioral Consult Assistant</h2>
     <p style="margin-bottom:20px; color:#64748b;">Inquire about retention time metrics, reducing e-commerce bounce rates, or maximizing customer experience values.</p>
-    
+
     <div id="chat-box">
-        <div class="msg bot-msg">Hello. I am your specialized E-commerce Retention Engine consultant. I can assist you with user experience frameworks, conversion leak fixes, and behavioral metrics interpretation. Try asking: "How to fix high bounce rate?" or "What is retention time?".</div>
+        <div class="msg bot-msg">
+            <span class="sender-label">AI Consultant</span>
+            Hello! I am your specialized E-commerce Retention Engine consultant. Ask me anything about bounce rates, retention metrics, conversion optimization, UX strategy, or customer behavior analysis.
+        </div>
     </div>
 
     <div class="chat-input-area">
         <input type="text" id="userInput" placeholder="Type an analytical question here...">
-        <button id="sendBtn" onclick="askBot()">Send</button>
+        <button id="sendBtn" onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i> Send
+        </button>
+    </div>
+
+    <div class="quick-btns">
+        <button class="quick-btn" onclick="quickAsk('How to fix high bounce rate?')">High bounce rate</button>
+        <button class="quick-btn" onclick="quickAsk('What is customer retention time?')">Retention time</button>
+        <button class="quick-btn" onclick="quickAsk('How to improve conversion rate?')">Conversion rate</button>
+        <button class="quick-btn" onclick="quickAsk('What are the key e-commerce metrics?')">Key metrics</button>
+        <button class="quick-btn" onclick="quickAsk('How to reduce cart abandonment?')">Cart abandonment</button>
+        <button class="quick-btn" onclick="quickAsk('How to improve customer experience?')">Customer experience</button>
     </div>
 </main>
 
 <script>
-async function askBot() {
-    const inputField = document.getElementById('userInput');
-    let query = inputField.value.trim();
-    const chatBox = document.getElementById('chat-box');
-    if (!query) return;
+let conversationHistory = [];
+let isLoading = false;
 
-    chatBox.innerHTML += `<div class="msg user-msg">${query}</div>`;
-    inputField.value = "";
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    const loadId = "load-" + Date.now();
-    chatBox.innerHTML += `<div class="msg bot-msg" id="${loadId}"><i class="fas fa-spinner fa-spin"></i> Processing metrics context...</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    setTimeout(async () => {
-        const botMessageElem = document.getElementById(loadId);
-        let lowerQuery = query.toLowerCase();
-
-        if (lowerQuery.includes("bounce") || lowerQuery.includes("bounce rate")) {
-            botMessageElem.innerHTML = "<strong>Retention Advice:</strong> High bounce rates indicate that product pages fail to capture attention instantly. Consider reducing layout shift, optimizing critical image assets, and structuring price tiers clearly above the fold.";
-        } else if (lowerQuery.includes("retention") || lowerQuery.includes("retention time")) {
-            botMessageElem.innerHTML = "<strong>Metric Definition:</strong> Customer Retention Time tracks the continuous duration a unique session keeps a product viewport active. Values over 90 seconds showcase strong purchase consideration indicators.";
-        } else if (lowerQuery.includes("optimize") || lowerQuery.includes("conversion")) {
-            botMessageElem.innerHTML = "<strong>Strategy Guide:</strong> Streamline multi-stage customer interactions. Implement quick preview carts, remove strict signup dependencies before checking out, and embed contextual product recommendations.";
-        } else {
-            try {
-                const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
-                const data = await res.json();
-                if(data.query.search.length > 0) {
-                    botMessageElem.innerHTML = `<strong>Discovered Context:</strong> ${data.query.search[0].snippet}... For custom architectural fixes, please contact your data system administrator.`;
-                } else {
-                    botMessageElem.innerHTML = "No definitive behavioral patterns found for this specific query. Please rephrase or alter input metrics terms.";
-                }
-            } catch(e) {
-                botMessageElem.innerHTML = "Knowledge communication loop failed. Ensure connection parameters are functional.";
-            }
-        }
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }, 1000);
+function quickAsk(text) {
+    document.getElementById('userInput').value = text;
+    sendMessage();
 }
 
-document.getElementById('userInput').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') askBot();
+function appendUserMessage(text) {
+    const chatBox = document.getElementById('chat-box');
+    const div = document.createElement('div');
+    div.className = 'msg user-msg';
+    div.textContent = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function appendBotMessage(isLoadingState) {
+    const chatBox = document.getElementById('chat-box');
+    const div = document.createElement('div');
+    div.className = 'msg bot-msg';
+
+    const label = document.createElement('span');
+    label.className = 'sender-label';
+    label.textContent = 'AI Consultant';
+
+    const content = document.createElement('span');
+    if (isLoadingState) {
+        content.innerHTML = '<span class="spinner"></span>Processing metrics context...';
+    }
+
+    div.appendChild(label);
+    div.appendChild(content);
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    return { div, content };
+}
+
+function setUILoading(state) {
+    isLoading = state;
+    const btn = document.getElementById('sendBtn');
+    const input = document.getElementById('userInput');
+    btn.disabled = state;
+    input.disabled = state;
+    btn.innerHTML = state
+        ? '<span class="spinner"></span> Processing...'
+        : '<i class="fas fa-paper-plane"></i> Send';
+    document.querySelectorAll('.quick-btn').forEach(b => b.disabled = state);
+}
+
+async function sendMessage() {
+    if (isLoading) return;
+
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    appendUserMessage(text);
+    conversationHistory.push({ role: 'user', content: text });
+
+    setUILoading(true);
+    const { content: botContent } = appendBotMessage(true);
+
+    try {
+        const response = await fetch('https://ict-project-pi.vercel.app/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: conversationHistory })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            botContent.textContent = 'Error: ' + (data.error.message || 'Could not get a response. Please try again.');
+        } else {
+            const reply = data.content
+                .filter(block => block.type === 'text')
+                .map(block => block.text)
+                .join('');
+            botContent.textContent = reply;
+            conversationHistory.push({ role: 'assistant', content: reply });
+        }
+
+    } catch (err) {
+        botContent.textContent = 'Connection error. Please check your internet and try again.';
+    }
+
+    setUILoading(false);
+    document.getElementById('chat-box').scrollTop = 99999;
+}
+
+document.getElementById('userInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
 });
 </script>
 
